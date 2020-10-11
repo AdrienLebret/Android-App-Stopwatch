@@ -15,7 +15,7 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     TextView tvSplash, tvSubSplash;
-    Button btnget;
+    Button btnstopwatch, btntimer;
     Animation atg, btgone, btgtwo;
     ImageView ivSplash;
 
@@ -26,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
         tvSplash = findViewById(R.id.tvSplash);
         tvSubSplash = findViewById(R.id.tvSubSplash);
-        btnget = findViewById(R.id.btnget);
+        btnstopwatch = findViewById(R.id.btnstopwatch);
+        btntimer = findViewById(R.id.btntimer);
         ivSplash = findViewById(R.id.ivSplash);
 
         // load animations
@@ -39,13 +40,23 @@ public class MainActivity extends AppCompatActivity {
         ivSplash.startAnimation(atg);
         tvSubSplash.startAnimation(btgone);
         tvSplash.startAnimation(btgone);
-        btnget.startAnimation(btgtwo);
+        btnstopwatch.startAnimation(btgtwo);
+        btntimer.startAnimation(btgtwo);
 
         // passing event
-        btnget.setOnClickListener(new View.OnClickListener() {
+        btnstopwatch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent a = new Intent(MainActivity.this,StopWatchAct.class);
+                a.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(a);
+            }
+        });
+
+        btntimer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent a = new Intent(MainActivity.this,TimerWatchAct.class);
                 a.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(a);
             }
@@ -59,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
         // customize font
         tvSplash.setTypeface(MRegular);
         tvSubSplash.setTypeface(MLight);
-        btnget.setTypeface(MMedium);
+        btnstopwatch.setTypeface(MMedium);
+        btntimer.setTypeface(MMedium);
 
     }
 }
