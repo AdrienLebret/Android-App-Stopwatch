@@ -1,6 +1,8 @@
 package adrienlebret.studio.fr.mystopwatch;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -29,6 +31,7 @@ public class TimerWatchAct extends AppCompatActivity {
 
     private boolean timerRunning = false;
     private long workTimeLeft = 1500000; // 25 minutes
+    //private long workTimeLeft = 10000; // 10 secondes TEST
     private long breakTimeLeft = 300000; // 5 minutes
 
     @Override
@@ -115,14 +118,23 @@ public class TimerWatchAct extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                // when finish
-                // hide text view
-                timerHere.setVisibility(View.GONE);
 
-                // display toast
-                // IDEA : PUT AN ALARM - NOTIFICATION
-                Toast.makeText(TimerWatchAct.this
-                        ,"Coutdown timer has ended", Toast.LENGTH_LONG).show();
+                // display notification
+                //Toast.makeText(TimerWatchAct.this, "Coutdown timer has ended", Toast.LENGTH_LONG).show();
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(TimerWatchAct.this,"My Notification")
+                        .setSmallIcon(R.drawable.ic_timer_app_notification_foreground)
+                        .setContentTitle("End of the working session")
+                        .setContentText("Let's have a little break")
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true);
+
+                NotificationManagerCompat managerCompat = NotificationManagerCompat.from(TimerWatchAct.this);
+                managerCompat.notify(1, builder.build());
+
+                // IDEA : PUT A SNOOZE BUTTON
+                    // https://developer.android.com/training/notify-user/build-notification#Actions
+
+
             }
         }.start();
 
