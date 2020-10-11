@@ -2,29 +2,34 @@ package adrienlebret.studio.fr.mystopwatch;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.SystemClock;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class TimerWatchAct extends AppCompatActivity {
 
     //TextView tvSplash, tvSubSplash;
     Button btnstart, btnstop;
-    Animation roundingalone;
+    //Animation roundingalone;
     ImageView icanchor;
     TextView timerHere;
+    CountDownTimer countDownTimer;
+
+    ObjectAnimator icanchorAnimation; // animation
+
+    private boolean timerRunning = false;
+    private long workTimeLeft = 1500000; // 25 minutes
+    private long breakTimeLeft = 300000; // 5 minutes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,46 +41,29 @@ public class TimerWatchAct extends AppCompatActivity {
         icanchor = findViewById(R.id.icanchor);
         timerHere = findViewById(R.id.timerHere);
 
-        // initialize timer duration
-        long duration = TimeUnit.MINUTES.toMillis(1);
-
-        // initialize coutdown timer
-        new CountDownTimer(duration, 5000) {
-            @Override
-            public void onTick(long l) {
-                // when tick
-
-                // convert millisecond to minute and second
-                String sDuration = String.format(Locale.FRANCE,"%02d:%02d"
-                        ,TimeUnit.MILLISECONDS.toMinutes(l)
-                        ,TimeUnit.MILLISECONDS.toSeconds(l) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(l)));
-
-                // set converted string on text view
-                timerHere.setText(sDuration);
-
-            }
-
-            @Override
-            public void onFinish() {
-                // when finish
-                // hide text view
-                timerHere.setVisibility(View.GONE);
-
-                // display toast
-                Toast.makeText(getApplicationContext()
-                    ,"Coutdown timer has ended", Toast.LENGTH_LONG).show();
-            }
-        }.start();
-
         // rotate the canchor
         icanchor.setRotation(33);
 
         // create optional animation
-        btnstop.setAlpha(0);
+        //btnstop.setAlpha(0);
 
         // load animations
-        roundingalone = AnimationUtils.loadAnimation(this, R.anim.roundingalone );
+        //roundingalone = AnimationUtils.loadAnimation(this, R.anim.roundingalone );
+        icanchorAnimation = ObjectAnimator.ofFloat(icanchor,
+                View.ROTATION, 0.0f, 360.0f);
+
+        icanchorAnimation.setDuration(4000);
+        icanchorAnimation.setRepeatCount(Animation.INFINITE);
+        icanchorAnimation.setInterpolator(new LinearInterpolator());
+
+        icanchorAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                icanchor.animate()
+                        .alpha(0.0f)
+                        .setDuration(1000);
+            }
+        });
 
         // import font
         Typeface MMedium = Typeface.createFromAsset(getAssets(), "fonts/MMedium.ttf");
@@ -89,13 +77,7 @@ public class TimerWatchAct extends AppCompatActivity {
         btnstart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // passing animation
-                icanchor.startAnimation(roundingalone);
-                btnstop.animate().alpha(1).translationY(-80).setDuration(300).start();
-                btnstart.animate().alpha(0).setDuration(300).start();
-                // start time
-                //timerHere.setBase(SystemClock.elapsedRealtime());
-                //timerHere.start();
+                startPause();
             }
         });
 
@@ -103,12 +85,76 @@ public class TimerWatchAct extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // stop animation
-                icanchor.clearAnimation();
-                btnstart.animate().alpha(1).translationY(-80).setDuration(300).start();
-                btnstop.animate().alpha(0).setDuration(300).start();
-                // start time
-                //timerHere.stop();
+                icanchorAnimation.end();
+                workTimeLeft = 1500000;
+                timerRunning = false;
+                btnstart.setText("Start Timer");
+                countDownTimer.cancel();
+                icanchor.setRotation(33);
+                //countDownTimer.start();
+                updateTimer();
             }
         });
+    }
+
+    public void startPause() {
+        if(timerRunning){
+            pauseTimer();
+        } else {
+            startTimer();
+        }
+    }
+
+    public void startTimer() {
+        countDownTimer = new CountDownTimer(workTimeLeft, 1000) {
+            @Override
+            public void onTick(long l) {
+                workTimeLeft = l;
+                updateTimer();
+            }
+
+            @Override
+            public void onFinish() {
+                // when finish
+                // hide text view
+                timerHere.setVisibility(View.GONE);
+
+                // display toast
+                // IDEA : PUT AN ALARM - NOTIFICATION
+                Toast.makeText(TimerWatchAct.this
+                        ,"Coutdown timer has ended", Toast.LENGTH_LONG).show();
+            }
+        }.start();
+
+        btnstart.setText("Pause Timer");
+
+        if (workTimeLeft == 1500000 ){
+            icanchorAnimation.start();
+        } else if (!timerRunning) {
+            icanchorAnimation.resume();
+        }
+
+        timerRunning = true;
+    }
+
+    public void updateTimer() {
+        int minutes = (int) workTimeLeft / 60000;
+        int seconds = (int) workTimeLeft % 60000 / 1000;
+
+        String timeLeftText;
+
+        timeLeftText = "" + minutes;
+        timeLeftText +=  ":";
+        if (seconds < 10) timeLeftText += "0";
+        timeLeftText += seconds;
+
+        timerHere.setText(timeLeftText);
+    }
+
+    public void pauseTimer() {
+        countDownTimer.cancel();
+        btnstart.setText("Start Timer");
+        timerRunning = false;
+        icanchorAnimation.pause();
     }
 }

@@ -77,7 +77,7 @@
         android:layout_marginBottom="40dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Finish Workout"
+        android:text="Restart the work session"
         android:textAllCaps="false"
         android:textColor="#FFF"
         android:textSize="20sp"
